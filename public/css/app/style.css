@@ -1,0 +1,73 @@
+.app{
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.chapter{
+    background: #F5F5F5;
+    border: 1px solid white;
+    border-radius: 20px;
+    width: 380px;
+    padding: 10px;
+    margin: 10px 0 0 0;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+.info{
+    align-self: baseline;
+    text-align: left;
+    margin-bottom: 10px;
+}
+.recommends{
+    max-height: 200px;
+    overflow: auto;
+}
+.recommend{
+    border: 0px solid white;
+    border-radius: 20px;
+    width: 320px;
+    height: auto;
+    padding: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(149deg, rgba(24,138,141,1) 0%, rgba(96,221,142,1) 42%, rgba(24,138,141,1) 72%, rgba(96,221,142,1) 100%);
+    animation: gradient 10s infinite linear;
+    background-size: 400%;
+    font-size: 15px;
+    line-height: 1,2;
+}
+.text-header{
+    text-align: center;
+    color: rgba(24,138,141,1);
+}
+.text-small{
+    text-align: center;
+    font-size: 10px;
+}
+TABLE{
+    text-align: center;
+}
+INPUT, SELECT{
+    width: 250px;
+    outline: none;
+    border: none;
+}
+.p-green{
+    color: rgba(24,138,141,1);
+}
+@keyframes gradient {
+    0% {
+        background-position: 80% 0%;
+    }
+    50% {
+        background-position: 20% 100%;
+    }
+    100% {
+        background-position: 80% 0%;
+    }
+}

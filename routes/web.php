@@ -14,7 +14,7 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-Route::get('/', function () {
+Route::get('/app', function () {
     return view('app');
 });
 Route::post('/login', [AuthController::class, 'auth']);
