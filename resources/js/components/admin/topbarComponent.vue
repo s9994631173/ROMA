@@ -1,6 +1,6 @@
 <template>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="/admin/#">АДМИНИСТРАТОР</a>
+    <a class="navbar-brand" href="/app#/admin/">АДМИНИСТРАТОР</a>
     <div class='collapse navbar-collapse'>
         <ul class='navbar-nav mr-auto'>
             <li class='nav-item'>
