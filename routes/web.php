@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StatsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,5 @@ Route::get('/app', function () {
     return view('app');
 });
 Route::post('/login', [AuthController::class, 'auth']);
+
+Route::get('/stats', [StatsController::class, 'stats']);

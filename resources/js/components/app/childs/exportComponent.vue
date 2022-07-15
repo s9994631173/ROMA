@@ -38,7 +38,7 @@
         name: 'exportComponent',
         data: function(){
             return{
-                searchItem: this.$route.query.value,
+                searchItem: null,
                 recommends: [],
                 about: null,
                 notfound: false
@@ -46,37 +46,30 @@
         },
         methods: {
             select: function(data){
-                let form = new FormData;
-                form.append('item', data);
-
-                fetch('/api/export/get', {
-                    method: 'POST',
-                    body: form
+                axios.post('/api/export/search', {
+                    item: data
                 })
-                .then(response => response.json())
-                .then(response => this.about = response[0].about)
+                .then(response => this.about = response.data[0].about)
             }
         },
-        computed: {
-            search: function(){
+        watch: {
+            searchItem (){
                 this.notfound = false
                 if(this.searchItem.length > 3){
-                    let form = new FormData;
-                    form.append('item', this.searchItem);
-
-                    fetch('/api/export/search', {
-                        method: 'POST',
-                        body: form
+                    axios.post('/api/export/presearch', {
+                        item: this.searchItem
                     })
-                    .then(response => response.json())
                     .then(response => {
-                        if(response.length == 0){
+                        if(response.data.length == 0){
                             this.notfound = true
                         }
-                        this.recommends = response
+                        this.recommends = response.data
                     })
                 }
             }
+        },
+        mounted(){
+            this.searchItem = this.$route.query.value ? this.$route.query.value: null
         }
     }
 </script>

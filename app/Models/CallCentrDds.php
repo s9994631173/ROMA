@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class CallCentrDds extends Model
 {
     use HasFactory;
+    protected $fillable = ['contragent', 'contract', 'message'];
 
-    public static function all($data){
+
+    public static function getAll($data){
         return self::select('message')
         ->where('contract', '=', $data['contract'])
         ->get();

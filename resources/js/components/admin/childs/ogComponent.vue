@@ -1,19 +1,10 @@
 <template>
     <div class='row justify-content-center'>
-        <modal name='alerts' 
-            @closed="closeAlerts" 
-            :adaptive="true" 
-            :draggable="true"
-            classes="alerts"
-            >
-            <ul v-for="(error, index) in errors" :key="index">
-                <li>{{error[0]}}</li>
-            </ul>
-        </modal>
+        <notifications />
         <div class='col-10'>
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <a class="nav-link" href="/app/#/og" target="_blank">Перейти в модуль</a>
+                    <a class="nav-link" href="app#/app/og" target="_blank">Перейти в модуль</a>
                 </div>
             </div>
             <table class='table table-striped table-bordered text-center'>
@@ -31,22 +22,22 @@
 
                 <tbody>
                     <tr>
-                        <td> <input type="text" name="itemName" class="form-control" v-model="appendItemName"/> </td>
-                        <td> <input type="text" name="classHazard" class="form-control" v-model="appendClassHazard"/> </td>
-                        <td> <input type="text" name="avia" class="form-control" v-model="appendAvia"/> </td>
-                        <td> <input type="text" name="addFee" class="form-control" v-model="appendAddFee"/> </td>
-                        <td> <input type="text" name="auto" class="form-control" v-model="appendAuto"/> </td>
-                        <td> <input type="text" name="note" class="form-control" v-model="appendNote"/> </td>
+                        <td> <input type="text" name="itemName" class="form-control" v-model="forAppend.itemName"/> </td>
+                        <td> <input type="text" name="classHazard" class="form-control" v-model="forAppend.classHazard"/> </td>
+                        <td> <input type="text" name="avia" class="form-control" v-model="forAppend.avia"/> </td>
+                        <td> <input type="text" name="addFee" class="form-control" v-model="forAppend.addFee"/> </td>
+                        <td> <input type="text" name="auto" class="form-control" v-model="forAppend.auto"/> </td>
+                        <td> <input type="text" name="note" class="form-control" v-model="forAppend.note"/> </td>
                         <td> <button class="btn btn-success" @click="append">добавить</button> </td>
                     </tr>
-                    <tr v-for="(item, index) in allArray" :key="index" :name="item.id" @change="change(item)">
+                    <tr v-for="(item, index) in adminItems" :key="index" @change="change(item)">
                         <td> <input type="text" name="itemName" class="form-control" v-model="item.itemName"/> </td>
                         <td> <input type="text" name="classHazard" class="form-control" v-model="item.classHazard"/> </td>
                         <td> <input type="text" name="avia" class="form-control" v-model="item.avia"/> </td>
                         <td> <input type="text" name="addFee" class="form-control" v-model="item.additional_fee"/> </td>
                         <td> <input type="text" name="auto" class="form-control" v-model="item.auto"/> </td>
                         <td> <input type="text" name="note" class="form-control" v-model="item.note"/> </td>
-                        <td> <button class="btn btn-danger" @click="remove(item.id)">удалить</button> </td>
+                        <td> <button class="btn btn-danger" @click="remove(item)">удалить</button> </td>
                     </tr>
                 </tbody>
             </table>
@@ -58,111 +49,52 @@
     export default {
         data: function(){
             return{
-                appendItemName: null,
-                appendClassHazard: null,
-                appendAvia: null,
-                appendAddFee: null,
-                appendAuto: null,
-                appendNote: null,
-
-                allArray: [],
-                errors: null
+                forAppend: {
+                    itemName: null,
+                    classHazard: null,
+                    avia: null,
+                    addFee: null,
+                    auto: null,
+                    note: null,
+                },
+                adminItems: []
             }
         },
-        methods: {
+       methods: {
             append: function(){
-                let form = new FormData;
-                form.append('itemName', this.appendItemName);
-                form.append('classHazard', this.appendClassHazard);
-                form.append('avia', this.appendAvia);
-                form.append('addFee', this.appendAddFee);
-                form.append('auto', this.appendAuto);
-                form.append('note', this.appendNote);
-
-                fetch('/api/admin/og/create', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if(response.success){
-                        this.errors = false
-
-                        this.allArray = response.data
-
-                        this.appendItemName = null
-                        this.appendClassHazard = null
-                        this.appendAvia = null,
-                        this.appendAddFee = null,
-                        this.appendAuto = null,
-                        this.appendNote = null
-                    }else{
-                        this.errors = response.data
-                    }
+                axios.post('api/admin/og/create', this.forAppend)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
                 })
             },
-            remove: function(id){
-                let form = new FormData;
-                form.append('id', id);
-
-                fetch('/api/admin/og/delete', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-
-                        this.allArray = response.data
-                    }else{
-                        this.errors = response.data
-                    }
+            remove: function(obj){
+                axios.post('api/admin/og/delete', obj)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
                 })
             },
             change: function(obj){
-                let form = new FormData;
-                form.append('id', obj.id);
-                form.append('itemName', obj.itemName);
-                form.append('classHazard', obj.classHazard);
-                form.append('avia', obj.avia);
-                form.append('addFee', obj.addFee);
-                form.append('auto', obj.auto);
-                form.append('note', obj.note);
-
-                fetch('/api/admin/og/update', {
-                method: 'POST',
-                body: form
+                axios.post('/api/admin/og/update', obj)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
                 })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-                        
-                        this.allArray = response.data
-                    }else{
-                        this.errors = response.data
-                    }
-                })
-            },
-            closeAlerts: function(){
-                console.log('close')
-                this.errors = false
-            }
-        },
-        computed: {
-            alerts: function(){
-                if (this.errors){
-                    this.$modal.show('alerts')
-                }
             }
         },
         mounted() {
-            fetch('/api/admin/og/all', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(response => this.allArray = response)
+            axios.post('/api/admin/og/all')
+            .then(response => this.adminItems = response.data)
         }
     }
 </script>

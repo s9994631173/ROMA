@@ -24,23 +24,23 @@
 
         <div class="chapter" v-show="prompt">
             <div class="classHazard info" v-if="classHazard">
-                <span class="p-green">Класс опасности:</span>
+                <span class="p-green">Класс опасности: </span>
                 <span> {{ classHazard }} </span>
             </div>
             <div class="avia info" v-if="avia">
-                <span class="p-green">На АВИА:</span>
+                <span class="p-green">На АВИА: </span>
                 <span> {{ avia }} </span>
             </div>
             <div class="additionalFee info" v-if="additionalFee">
-                <span class="p-green">Доп. сбор «опасный груз» на АВИА:</span>
+                <span class="p-green">Доп. сбор «опасный груз» на АВИА: </span>
                 <span> {{ additionalFee }} </span>
             </div>
             <div class="auto info" v-if="auto">
-                <span class="p-green">Возможна перевозка  ЗЕМЛЕЙ:</span>
+                <span class="p-green">Возможна перевозка  ЗЕМЛЕЙ: </span>
                 <span> {{ auto }} </span>
             </div>
             <div class="note info" v-if="note">
-                <span class="p-green">Примечания:</span> <br>
+                <span class="p-green">Примечания: </span>
                 <span> {{ note }} </span>
             </div>
         </div>
@@ -59,7 +59,7 @@
         name: 'ogComponent',
         data: function(){
             return{
-                searchItem: this.$route.query.value,
+                searchItem: null,
                 recommends: [],
                 classHazard: null,
                 avia: null,
@@ -73,46 +73,40 @@
         },
         methods: {
             select: function(data){
-                let form = new FormData;
-                form.append('item', data);
-
-                fetch('/api/og/get', {
-                    method: 'POST',
-                    body: form
+                axios.post('/api/og/search', {
+                    item: data
                 })
-                .then(response => response.json())
                 .then(response => {
-                    this.classHazard = response[0].classHazard
-                    this.avia = response[0].avia
-                    this.additionalFee = response[0].additionalFee
-                    this.auto = response[0].auto
-                    this.note = response[0].note
+                    this.classHazard = response.data[0].classHazard
+                    this.avia = response.data[0].avia
+                    this.additionalFee = response.data[0].additionalFee
+                    this.auto = response.data[0].auto
+                    this.note = response.data[0].note
 
                     this.prompt = true
                 })
             }
         },
-        computed: {
-            search: function(){
+        watch: {
+            searchItem (){
                 this.notfound = false
                 if(this.searchItem.length > 3){
                     this.prompt = false
-                    let form = new FormData();
-                    form.append('item', this.searchItem);
 
-                    fetch('/api/og/search', {
-                        method: 'POST',
-                        body: form
+                    axios.post('/api/og/presearch', {
+                        item: this.searchItem
                     })
-                    .then(response => response.json())
                     .then(response => {
-                        if(response.length == 0){
+                        if(response.data.length == 0){
                             this.notfound = true
                         }
-                        this.recommends = response
+                        this.recommends = response.data
                     })
                 }
             }
+        },
+        mounted(){
+            this.searchItem = this.$route.query.value ? this.$route.query.value: null
         }
     }
 </script>

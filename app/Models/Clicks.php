@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Clicks extends Model
 {
     use HasFactory;
+    protected $fillable = ['date', 'login', 'module'];
 
     public static function click($data){
         $item = [

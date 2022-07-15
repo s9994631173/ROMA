@@ -22,20 +22,15 @@
         methods: {
             select: function(data){
                 this.info = null;
-                
-                let form = new FormData;
-                form.append('button', data);
 
-                fetch('/api/insurance/select', {
-                    method: 'POST',
-                    body: form
+                axios.post('/api/insurance/select', {
+                    button: data
                 })
-                .then(response => response.json())
                 .then(response => {
-                    if(response[0].type == 'link'){
-                        window.open(response[0].info);
+                    if(response.data[0].type == 'link'){
+                        window.open(response.data[0].info);
                     }else{
-                        this.info = response[0].info
+                        this.info = response.data[0].info
                     }
                 })
             }
@@ -44,11 +39,8 @@
 
         },
         mounted() {
-            fetch('/api/insurance/all', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(response => this.buttons = response)
+            axios.get('/api/insurance/all')
+            .then(response => this.buttons = response.data)
         }
     }
 </script>

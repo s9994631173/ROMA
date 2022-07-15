@@ -1,19 +1,10 @@
 <template>
     <div class='row justify-content-center'>
-        <modal name='alerts' 
-            @closed="closeAlerts" 
-            :adaptive="true" 
-            :draggable="true"
-            classes="alerts"
-            >
-            <ul v-for="(error, index) in errors" :key="index">
-                <li>{{error[0]}}</li>
-            </ul>
-        </modal>
+        <notifications />
         <div class='col-10'>
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <a class="nav-link" href="/app/#/cc" target="_blank">Перейти в модуль</a>
+                    <a class="nav-link" href="/app#/app/cc" target="_blank">Перейти в модуль</a>
                 </div>
             </div>
             <div class="row justify-content-center">
@@ -33,17 +24,17 @@
 
                 <tbody>
                     <tr>
-                        <td> <input type="text" name="button" class="form-control" v-model="appButton"/> </td>
+                        <td> <input type="text" name="button" class="form-control" v-model="forAppend.button"/> </td>
                         <td>
-                            <select class="form-control" v-model="appType">
+                            <select class="form-control" v-model="forAppend.type">
                                 <option>text</option>
                                 <option>link</option>
                             </select> 
                         </td>
-                        <td> <input class="form-control" type="text" name="info" v-model="appInfo"/> </td>
+                        <td> <input class="form-control" type="text" name="info" v-model="forAppend.info"/> </td>
                         <td> <button class="btn btn-success" @click="append">добавить</button> </td>
                     </tr>
-                    <tr v-for="(item, index) in buttons" :key="index" :name="item.id" @change="change(item)">
+                    <tr v-for="(item, index) in adminItems" :key="index" @change="change(item)">
                         <td> <input type="text" name="button" class="form-control" v-model="item.button"/> </td>
                         <td>
                             <select class="form-control" v-model="item.type">
@@ -52,7 +43,7 @@
                             </select> 
                         </td>
                         <td> <input type="text" name="info" class="form-control" v-model="item.info"/> </td>
-                        <td> <button class="btn btn-danger" @click="remove(item.id)">удалить</button> </td>
+                        <td> <button class="btn btn-danger" @click="remove(item)">удалить</button> </td>
                     </tr>
                 </tbody>
             </table>
@@ -70,98 +61,49 @@ import CCDD from './ccddComponent.vue';
         },
         data: function(){
             return{
-                appButton: null,
-                appType: 'text',
-                appInfo: null,
-
-                buttons: [],
-                errors: null
+                forAppend: {
+                    button: null,
+                    type: 'text',
+                    info: null
+                },
+                adminItems: []
             }
         },
         methods: {
             append: function(){
-                let form = new FormData;
-                form.append('button', this.appButton);
-                form.append('type', this.appType);
-                form.append('info', this.appInfo);
-
-                fetch('/api/admin/cc/create', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-
-                        this.buttons = response.data
-
-                        this.appButton = null
-                        this.appType = 'text'
-                        this.appInfo = null
-                    }else{
-                        this.errors = response.data
-                    }
+                axios.post('api/admin/cc/create', this.forAppend)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
                 })
             },
-            remove: function(id){
-                let form = new FormData;
-                form.append('id', id);
-
-                fetch('/api/admin/cc/delete', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-
-                        this.buttons = response.data
-                    }else{
-                        this.errors = response.data
-                    }
+            remove: function(obj){
+                axios.post('api/admin/cc/delete', obj)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
                 })
             },
             change: function(obj){
-                let form = new FormData;
-                form.append('id', obj.id);
-                form.append('button', obj.button);
-                form.append('type', obj.type);
-                form.append('info', obj.info);
-
-                fetch('/api/admin/cc/update', {
-                method: 'POST',
-                body: form
-            })
-            .then(response => response.json())
-            .then(response => {
-                if (response.success){
-                    this.errors = false
-
-                    this.buttons = response.data
-                }else{
-                    this.errors = response.data
-                }
-            })
-            },
-            closeAlerts: function(){
-                this.errors = false
-            }
-        },
-        computed: {
-            alerts: function(){
-                if (this.errors){
-                    this.$modal.show('alerts')
-                }
+                axios.post('/api/admin/cc/update', obj)
+                .then(response => this.adminItems = response.data.data)
+                .catch(err => {
+                        this.$notify({
+                        text: err.response.data.message,
+                        type: 'error'
+                        });
+                })
             }
         },
         mounted() {
-            fetch('/api/admin/cc/all', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(response => this.buttons = response)
+            axios.post('/api/admin/cc/all')
+            .then(response => this.adminItems = response.data)
         }
     }
 </script>

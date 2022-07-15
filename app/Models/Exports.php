@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Exports extends Model
 {
     use HasFactory;
+    protected $fillable = ['itemName', 'about'];
 
-    public static function search($data){
+    public static function presearch($data){
         return self::select('itemName')
         ->where('itemName', 'LIKE', '%' . $data['item'] . '%')
         ->distinct()
         ->get();
     }
 
-    public static function get($data){
+    public static function search($data){
         return self::select('about')
         ->where('itemName', '=', $data['item'])
         ->distinct()

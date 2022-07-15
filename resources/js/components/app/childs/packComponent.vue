@@ -18,7 +18,7 @@
 				РЕКОМЕНДАЦИИ 
 				<span class="p-green">кликни, чтобы выбрать</span>
 				<div class="recommends">
-					<div class="recommend" v-for="(item, index) in recommends" :key="index" @click="selectSearch({category: item.category, char: item.char})">
+					<div class="recommend" v-for="(item, index) in recommends" :key="index" @click="selectSearch(item)">
 						<div class="itemName" style="font-weight: bold;"> {{item.itemName}} </div>
 						<div class="text-small"> {{item.category}} </div>
 						<div class="text-small"> {{item.char}} </div>
@@ -32,13 +32,13 @@
 					<td><span class="centrtext">Поиск по категории вложения</span></td>
 				</tr>
 				<tr>
-					<td><select class="select1" id="category" @change="selectCategory($event)">
+					<td><select class="select1" id="category" v-model="selectedCategory">
 						<option>-</option>
 						<option v-for="(item, index) in categorys" :key="index">{{ item.category }}</option>
 					</select></td>
 				</tr>
 				<tr>
-					<td><select class="select1" id="char" @change="selectChar($event)" v-if="chars.length > 0">
+					<td><select class="select1" id="char" v-model="selectedChar" v-if="chars.length > 0">
 						<option v-for="(char, index) in chars" :key="index">{{ char.char }}</option>
 					</select></td>
 				</tr>
@@ -69,87 +69,71 @@ import axios from 'axios'
 		name: 'v-pack',
 		data: function(){
 			return{
-				searchItem: this.$route.query.value,
+				searchItem: null,
 				categorys: [],
-				selectedCategory: null,
 				chars: [],
+				selectedCategory: null,
 				selectedChar: null,
+
 				aboutItem: null,
 				method: null,
 				pack: null,
 				recommends: [],
-				notfound: false
+				notfound: false,
 			}
 		},
 		methods:{
-			selectCategory: function(data){
-				this.selectedCategory = data.target.value
-				let form = new FormData();
-				form.append('category', data.target.value)
-				var config = {
-				method: 'post',
-				url: '/api/pack/char',
-				data : form
-				};
-				axios(config)
-				.then(response => {
-					this.chars = response.data
-					this.selectedChar = response.data[0].char
-				})
-			},
-			selectChar: function(data){
-				this.selectedChar = data.target.value
-			},
 			selectSearch: function(obj){
 				this.selectedCategory = obj.category
 				this.selectedChar = obj.char
 			}
 		},
 		computed: {
-			final: function(){
-				let form = new FormData();
-				form.append('char', this.selectedChar)
-				form.append('category', this.selectedCategory);
 
-				fetch('/api/pack/final', {
-					method: 'POST',
-					body: form
+		},
+		watch: {
+			selectedCategory (){
+				axios.post('/api/pack/getChars', {
+					category: this.selectedCategory
 				})
-				.then(response => response.json())
 				.then(response => {
-					this.aboutItem = response[0].aboutItem
-					this.method = response[0].method
-					this.pack = response[0].pack
+					this.chars = response.data
+					this.selectedChar = response.data[0].char
 				})
-				return
 			},
-			search: function(){
+			searchItem (){
 				this.recommends = []
 				this.notfound = false
 
 				if(this.searchItem.length>2){
-					let form = new FormData();
-					form.append('item', this.searchItem)
-					fetch('/api/pack/search', {
-						method: 'POST',
-						body: form
+					axios.post('/api/pack/presearch', {
+						item: this.searchItem
 					})
-					.then(response => response.json())
 					.then(response => {
-						console.log(response.length)
-						if(response.length == 0){
+						if(response.data.length == 0){
 							this.notfound = true
 						}
-						this.recommends = response
+						this.recommends = response.data
 					})
 				}
-				return
+			},
+			selectedChar (){
+				axios.post('/api/pack/search', {
+					char: this.selectedChar,
+					category: this.selectedCategory
+				})
+				.then(response => {
+					this.aboutItem = response.data[0].aboutItem
+					this.method = response.data[0].method
+					this.pack = response.data[0].pack
+				})
 			}
 		},
 		mounted(){
-			axios.get('/api/pack/categorys')
+			axios.get('/api/pack/getAllCategorys')
 			.then(response => {
 				this.categorys = response.data
+				this.searchItem = this.$route.query.value ? this.$route.query.value: null
 			})
 		}
     }

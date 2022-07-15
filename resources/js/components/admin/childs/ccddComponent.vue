@@ -1,15 +1,6 @@
 <template>
     <div class='row justify-content-center'>
-        <modal name='alerts' 
-            @closed="closeAlerts" 
-            :adaptive="true" 
-            :draggable="true"
-            classes="alerts"
-            >
-            <ul v-for="(error, index) in errors" :key="index">
-                <li>{{error[0]}}</li>
-            </ul>
-        </modal>
+        <notifications />
         <div class='col-12'>
             <div class="row justify-content-center">
                 <div class="col-auto">
@@ -28,16 +19,16 @@
 
                 <tbody>
                     <tr>
-                        <td> <input type="text" name="contragent" class="form-control" v-model="appContragent"/> </td>
-                        <td> <input type="text" name="contract" class="form-control" v-model="appContract"/> </td>
-                        <td> <input type="text" name="message" class="form-control" v-model="appMessage"/> </td>
+                        <td> <input type="text" name="contragent" class="form-control" v-model="forAppend.contragent"/> </td>
+                        <td> <input type="text" name="contract" class="form-control" v-model="forAppend.contract"/> </td>
+                        <td> <input type="text" name="message" class="form-control" v-model="forAppend.message"/> </td>
                         <td> <button class="btn btn-success" @click="append">добавить</button> </td>
                     </tr>
-                    <tr v-for="(item, index) in dds" :key="index" :name="item.id" @change="change(item)">
+                    <tr v-for="(item, index) in adminItems" :key="index" @change="change(item)">
                         <td> <input type="text" name="contragent" class="form-control" v-model="item.contragent"/> </td>
                         <td> <input type="text" name="contract" class="form-control" v-model="item.contract"/> </td>
                         <td> <input type="text" name="message" class="form-control" v-model="item.message"/> </td>
-                        <td> <button class="btn btn-danger" @click="remove(item.id)">удалить</button> </td>
+                        <td> <button class="btn btn-danger" @click="remove(item)">удалить</button> </td>
                     </tr>
                 </tbody>
             </table>
@@ -46,103 +37,54 @@
 </template>
 
 <script>
+import axios from 'axios'
+
     export default {
         data: function(){
             return{
-                appContragent: null,
-                appContract: null,
-                appMessage: null,
-
-                dds: [],
-                errors: null
+                forAppend: {
+                    contragent: null,
+                    contract: null,
+                    message: null
+                },
+                adminItems: []
             }
         },
         methods: {
-            append: function(){
-                let form = new FormData;
-                form.append('contragent', this.appContragent);
-                form.append('contract', this.appContract);
-                form.append('message', this.appMessage);
-
-                fetch('/api/admin/cc/dd/create', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-
-                        this.dds = response.data
-
-                        this.appContragent = null
-                        this.appContract = null
-                        this.appMessage = null
-                    }else{
-                        this.errors = response.data
-                    }
-                })
-                .catch(e => console.log(e))
-            },
-            remove: function(id){
-                let form = new FormData;
-                form.append('id', id);
-
-                fetch('/api/admin/cc/dd/delete', {
-                    method: 'POST',
-                    body: form
-                })
-                .then(response => response.json())
-                .then(response => {
-                    if (response.success){
-                        this.errors = false
-
-                        this.dds = response.data
-                    }else{
-                        this.errors = response.data
-                    }
-                })
-            },
-            change: function(obj){
-                let form = new FormData;
-                form.append('id', obj.id);
-                form.append('contragent', obj.contragent);
-                form.append('contract', obj.contract);
-                form.append('message', obj.message);
-
-                fetch('/api/admin/cc/dd/update', {
-                method: 'POST',
-                body: form
-            })
-            .then(response => response.json())
-            .then(response => {
-                if (response.success){
-                    this.errors = false
-
-                    this.dds = response.data
-                }else{
-                    this.errors = response.data
+                append: function(){
+                    axios.post('api/admin/cc/dd/create', this.forAppend)
+                    .then(response => this.adminItems = response.data.data)
+                    .catch(err => {
+                            this.$notify({
+                            text: err.response.data.message,
+                            type: 'error'
+                            });
+                    })
+                },
+                remove: function(obj){
+                    axios.post('api/admin/cc/dd/delete', obj)
+                    .then(response => this.adminItems = response.data.data)
+                    .catch(err => {
+                            this.$notify({
+                            text: err.response.data.message,
+                            type: 'error'
+                            });
+                    })
+                },
+                change: function(obj){
+                    axios.post('/api/admin/cc/dd/update', obj)
+                    .then(response => this.adminItems = response.data.data)
+                    .catch(err => {
+                            this.$notify({
+                            text: err.response.data.message,
+                            type: 'error'
+                            });
+                    })
                 }
-            })
             },
-            closeAlerts: function(){
-                console.log('close')
-                this.errors = false
+            mounted() {
+                axios.post('/api/admin/cc/dd/all')
+                .then(response => this.adminItems = response.data)
             }
-        },
-        computed: {
-            alerts: function(){
-                if (this.errors){
-                    this.$modal.show('alerts')
-                }
-            }
-        },
-        mounted() {
-            fetch('/api/admin/cc/dd/all', {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(response => this.dds = response)
-        }
     }
 </script>

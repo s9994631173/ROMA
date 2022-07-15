@@ -8,6 +8,10 @@
     export default{
         components: {
             TopBar
+        },
+        mounted (){
+            axios.post('/api/checkLogin')
+            .catch(() => this.$router.push('/login'))
         }
     }
 </script>

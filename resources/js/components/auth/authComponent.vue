@@ -52,6 +52,10 @@ import axios from 'axios'
                     })
                 });
             }
+        },
+        mounted(){
+            axios.post('/api/checkLogin')
+            .then(() => this.$router.push('/admin'))
         }
     }
 </script>

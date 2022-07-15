@@ -9,7 +9,7 @@ class Items extends Model
 {
     use HasFactory;
 
-    public static function search($data){
+    public static function presearch($data){
         return self::select('itemName', 'category', 'char')
         ->where('itemName', 'LIKE', '%' . $data['item'] . '%')
         ->distinct()

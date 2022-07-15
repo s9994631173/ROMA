@@ -8,23 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 class Categorys extends Model
 {
     use HasFactory;
+    protected $fillable = ['category', 'char', 'aboutItem', 'pack', 'method'];
 
-    public static function all(){
+    public static function getAll(){
         return self::select('category')
-        ->distinct()
-        ->get();
+            ->distinct()
+            ->get();
     }
 
-    public static function chars($data){
+    public static function getChars($data){
         return self::select('char')
-        ->where('category', '=', $data['category'])
-        ->get();
+            ->where('category', '=', $data['category'])
+            ->get();
     }
 
     public static function search($data){
         return self::select('aboutItem', 'pack', 'method')
-        ->where('category', '=', $data['category'])
-        ->where('char', '=', $data['char'])
-        ->get();
+            ->where('category', '=', $data['category'])
+            ->where('char', '=', $data['char'])
+            ->get();
     }
 }
