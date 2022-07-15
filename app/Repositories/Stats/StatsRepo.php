@@ -20,8 +20,8 @@ class StatsRepo{
         count(case when module='Упаковка' then login end) as 'pack',
         count(distinct case when module='Упаковка' then login end) as 'uniqPack',
     
-        count(case when module='Импорт' then login end) as 'import',
-        count(distinct case when module='Импорт' then login end) as 'uniqImport'
+        count(case when module='Из РФ в ЕС' then login end) as 'import',
+        count(distinct case when module='Из РФ в ЕС' then login end) as 'uniqImport'
         "))->groupBy('date')->orderBy('date', 'DESC')->paginate(30);
     
         // count of new users by date. Append to result array

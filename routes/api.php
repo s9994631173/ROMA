@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ClickController;
 use App\Http\Controllers\CcController;
 use App\Http\Controllers\GuideController;
 use App\Http\Controllers\InsuranceController;
@@ -20,10 +21,8 @@ use App\Http\Controllers\OgController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/clicker/click', [ClickController::class, 'click']);
+Route::post('/clicker/login', [ClickController::class, 'login']);
 
 Route::get('/cc/all', [CcController::class, 'getAll']);
 Route::post('/cc/select', [CcController::class, 'getSelect']);
