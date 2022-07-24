@@ -1,8 +1,8 @@
 <template>
     <div class="containter">
         <notifications />
-        <div class="row justify-content-center">
-            <div class="col-3">
+        <div class="row vh-100 justify-content-center">
+            <div class="col-3 align-self-center">
                 <form @submit.prevent="formSubmit">
                     <!-- Email input -->
                     <div class="form-outline mb-4">
